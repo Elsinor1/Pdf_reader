@@ -327,7 +327,10 @@ class App(CTk.CTk):
 
         # Analyze button
         self.right_button_read = CTk.CTkButton(
-            self.rightbar_frame, command=lambda: threading.Thread(target=self.analyze).start(), text="ANALYZE", height=50
+            self.rightbar_frame,
+            command=lambda: threading.Thread(target=self.analyze).start(),
+            text="ANALYZE",
+            height=50,
         )
         self.right_button_read.grid(
             row=6,
@@ -339,7 +342,6 @@ class App(CTk.CTk):
         # Right progress bar
         progressbar_2_var = tkinter.IntVar(value=0)
         self.progressbar_2 = CTk.CTkProgressBar(self.rightbar_frame)
-        
 
     # Displays single or double entry fields
     def single_or_double(self):
@@ -413,11 +415,16 @@ class App(CTk.CTk):
             output_db_path = self.leftbar_path_2.get("0.0", "end-1c")
         else:  # If user wants to create new output db
             output_db_path = create_db(self.leftbar_path_2.get("0.0", "end-1c"))
-        db = sqlite3.connect(output_db_path)
-        cur = db.cursor()
-        cur.execute(
-            "CREATE TABLE IF NOT EXISTS drawings(part_number TEXT UNIQUE NOT NULL PRIMARY KEY, drawing_text TEXT)"
-        )
+        try:
+            db = sqlite3.connect(output_db_path)
+            cur = db.cursor()
+            cur.execute(
+                "CREATE TABLE IF NOT EXISTS drawings(part_number TEXT UNIQUE NOT NULL PRIMARY KEY, drawing_text TEXT)"
+            )
+        except sqlite3.DatabaseError:
+            messagebox.showinfo(message=f"Selected database is invalid")
+            return
+
         # Gets list of PNs that already exist in the DB
         pn_tuples = cur.execute("SELECT part_number FROM drawings").fetchall()
         existing_pn = []
@@ -467,7 +474,7 @@ class App(CTk.CTk):
         self.progressbar_1.set(0)
         files_total = len(text_list)
         # List of not successful writing to DB
-        not_successful = []    
+        not_successful = []
         # For every read drawing
         for index, line in enumerate(text_list, start=1):
             # If PN already exists in the database, update drawing text
@@ -493,7 +500,9 @@ class App(CTk.CTk):
             self.update_idletasks
 
         if len(not_successful) > 0:
-            messagebox.showinfo(message=f"Read is finished, {len(not_successful)} failed")
+            messagebox.showinfo(
+                message=f"Read is finished, {len(not_successful)} failed"
+            )
         else:
             messagebox.showinfo(message="Read is finished")
 
@@ -543,8 +552,7 @@ class App(CTk.CTk):
                 text=f"ANALYZING DB: {index} / {input_total}"
             )
             self.update_idletasks
-        
-        
+
         # Save output in excel sheet
         output_path = self.right_path_2.get("0.0", "end-1c") + "/extract.xlsx"
         wb = openpyxl.Workbook()
@@ -566,18 +574,20 @@ class App(CTk.CTk):
             data_columns = row[1]
             for col_index, column in enumerate(data_columns, start=2):
                 ws.cell(row=row_index, column=col_index).value = column
-            self.progressbar_2_text.configure(text=f"SAVING TO EXCEL FILE: {row_index - 1} / {input_total}")       
+            self.progressbar_2_text.configure(
+                text=f"SAVING TO EXCEL FILE: {row_index - 1} / {input_total}"
+            )
             self.progressbar_2.set(row_index / input_total)
             self.update_idletasks()
-            
+
         wb.save(output_path)
-        
+
         messagebox.showinfo("Analyze is finished")
         self.progressbar_2_text.configure(text=f"")
         self.progressbar_2.grid_forget()
         self.progressbar_2_text.grid_forget()
         self.right_path_2.grid(row=5, column=1, padx=(5, 20), pady=(5, 5))
-        
+
         return
 
 
