@@ -87,10 +87,20 @@ def search_keyword(keyword, text):
 def search_between(keyword_tuple, text):
     try:
         # pattern = f"{keyword_tuple[0]}\n((.|\n)*){keyword_tuple[1]}\d+"
-        pattern = (
-            r"\b\w*" + keyword_tuple[1] + r"(.|\n)*" + keyword_tuple[2] + r"\w*\b"
-        )
-        out = re.search(pattern, text, re.IGNORECASE).group().strip()
+        # pattern = (
+        #     r"\b\w*" + keyword_tuple[1] + r"(.|\n)*" + keyword_tuple[2] + r"\w*\b"   .*?
+        # )
+        # pattern = r"(?:{0})(.|\n)(?:{1})".format(re.escape(keyword_tuple[1]), re.escape(keyword_tuple[2]))
+        # out = re.search(pattern, text, re.IGNORECASE).group(1).strip()
+        # print(out)
+        # re.sub(f"{keyword_tuple[1]}", "", out, re.IGNORECASE)
+        # re.sub(f"{keyword_tuple[2]}", "", out, re.IGNORECASE)
+
+        pattern = re.compile(rf'{keyword_tuple[1]}\n(.*?)\n{keyword_tuple[2]}', re.DOTALL | re.IGNORECASE)
+        # print(pattern)
+
+        # search for the text between the start and end strings
+        out = re.search(pattern, text).group(1).strip()
         if out == None:
             return "Not found3"
         else:

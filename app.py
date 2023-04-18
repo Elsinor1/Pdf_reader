@@ -573,7 +573,12 @@ class App(CTk.CTk):
             ws.cell(row=row_index, column=1).value = row[0]
             data_columns = row[1]
             for col_index, column in enumerate(data_columns, start=2):
-                ws.cell(row=row_index, column=col_index).value = column
+                try:
+                    ws.cell(row=row_index, column=col_index).value = column
+                except:
+                    normal_string = "".join(ch for ch in column if ch.isalnum())
+                    ws.cell(row=row_index, column=col_index).value = normal_string
+
             self.progressbar_2_text.configure(
                 text=f"SAVING TO EXCEL FILE: {row_index - 1} / {input_total}"
             )
@@ -582,7 +587,7 @@ class App(CTk.CTk):
 
         wb.save(output_path)
 
-        messagebox.showinfo("Analyze is finished")
+        messagebox.showinfo(message="Analyze is finished")
         self.progressbar_2_text.configure(text=f"")
         self.progressbar_2.grid_forget()
         self.progressbar_2_text.grid_forget()
