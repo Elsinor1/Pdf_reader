@@ -66,8 +66,10 @@ def create_db(path):
         open(f"{path}/output.db", "x")
         return f"{path}/output.db"
     except FileExistsError:
-        messagebox.showerror("File output.db already exists in the folder")
+        messagebox.showerror(message="File output.db already exists in the folder")
         return
+    except FileNotFoundError:
+        messagebox.showerror(message="Could not create DB in given folder")
 
 
 def search_keyword(keyword, text):
@@ -96,7 +98,9 @@ def search_between(keyword_tuple, text):
         # re.sub(f"{keyword_tuple[1]}", "", out, re.IGNORECASE)
         # re.sub(f"{keyword_tuple[2]}", "", out, re.IGNORECASE)
 
-        pattern = re.compile(rf'{keyword_tuple[1]}\n(.*?)\n{keyword_tuple[2]}', re.DOTALL | re.IGNORECASE)
+        pattern = re.compile(
+            rf"{keyword_tuple[1]}\n(.*?)\n{keyword_tuple[2]}", re.DOTALL | re.IGNORECASE
+        )
         # print(pattern)
 
         # search for the text between the start and end strings

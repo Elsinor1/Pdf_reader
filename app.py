@@ -25,12 +25,12 @@ class App(CTk.CTk):
 
         # WINDOW CONFIGURATION
         self.title("Machine reader")
-        self.geometry(f"{1300}x{600}")
+        self.geometry(f"{1400}x{600}")
 
         # layout grid 4x4
         self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(2, weight=2)
-        self.grid_columnconfigure(1, weight=2)
+        self.grid_columnconfigure(2, weight=2, minsize=600)
+        self.grid_columnconfigure(1, weight=2, minsize=600)
 
         # ---HEADER----
         self.header_frame = CTk.CTkFrame(self, corner_radius=0)
@@ -64,6 +64,7 @@ class App(CTk.CTk):
         self.leftbar_frame.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
         self.leftbar_frame.grid_columnconfigure((0, 2), weight=2)
         self.leftbar_frame.grid_columnconfigure(1, weight=1)
+        self.leftbar_frame.grid_columnconfigure((1, 2), minsize=200)
 
         # Read PDF document label
         self.label_1 = CTk.CTkLabel(
@@ -101,13 +102,13 @@ class App(CTk.CTk):
         )
         self.label_amount.grid(row=2, column=1, padx=5, pady=5, sticky="we")
         self.leftbar_amount = CTk.CTkTextbox(
-            self.leftbar_frame, width=100, height=15, font=CTk.CTkFont(size=10)
+            self.leftbar_frame, width=100, height=15, font=CTk.CTkFont(size=15)
         )
         self.leftbar_amount.grid(row=2, column=2, padx=(5, 20), pady=5)
 
         # Path text field
         self.leftbar_path_1 = CTk.CTkTextbox(
-            self.leftbar_frame, width=400, height=15, font=CTk.CTkFont(size=10)
+            self.leftbar_frame, width=400, height=15, font=CTk.CTkFont(size=12)
         )
         self.leftbar_path_1.grid(
             row=4, column=0, columnspan=3, padx=20, pady=(5, 20), sticky="ew"
@@ -151,7 +152,7 @@ class App(CTk.CTk):
         self.leftbar_button_2.grid(row=6, column=2, padx=(5, 20), pady=5)
         # Path for output
         self.leftbar_path_2 = CTk.CTkTextbox(
-            self.leftbar_frame, width=400, height=15, font=CTk.CTkFont(size=10)
+            self.leftbar_frame, width=400, height=15, font=CTk.CTkFont(size=12)
         )
         self.leftbar_path_2.grid(
             row=7, column=0, columnspan=3, padx=(20, 20), pady=(5, 20), sticky="WESN"
@@ -167,7 +168,9 @@ class App(CTk.CTk):
             row=8, column=0, padx=(20, 5), pady=(5, 20), sticky="WESN"
         )
         # Update radio button
-        self.radiobutton_frame_2 = CTk.CTkFrame(self.leftbar_frame)
+        self.radiobutton_frame_2 = CTk.CTkFrame(
+            self.leftbar_frame,
+        )
         self.radiobutton_frame_2.grid(
             row=8, column=1, columnspan=2, padx=(5, 20), pady=(5, 5), sticky="nsew"
         )
@@ -180,24 +183,25 @@ class App(CTk.CTk):
             text="Update existing data",
             value=0,
         )
-        self.radio_button_3.grid(row=0, column=0, pady=10, padx=5, sticky="n")
+        self.radio_button_3.grid(row=0, column=0, pady=10, padx=5, sticky="nsew")
         self.radio_button_4 = CTk.CTkRadioButton(
             self.radiobutton_frame_2,
             variable=self.radio_out_2,
             text="Don't update existing data",
             value=1,
         )
-        self.radio_button_4.grid(row=0, column=1, pady=10, padx=5, sticky="n")
+        self.radio_button_4.grid(row=0, column=1, pady=10, padx=5, sticky="nsew")
         # Left progress bar
         self.progressbar_1 = CTk.CTkProgressBar(
             self.leftbar_frame, height=20, corner_radius=5, border_width=3
         )
         # Progressbar text box
         self.progressbar_1_text = CTk.CTkLabel(
-            self.leftbar_frame,
+            self.radiobutton_frame_2,
             text="",
             fg_color="transparent",
-            font=CTk.CTkFont(size=18, weight="bold"),
+            width=50,
+            font=CTk.CTkFont(size=15, weight="bold"),
         )
 
         # -----RIGHT SECTION----
@@ -271,13 +275,18 @@ class App(CTk.CTk):
 
         # Search input fields
         self.analyze_input_1 = CTk.CTkEntry(
-            self.input_slider_frame, placeholder_text="Keyword"
+            self.input_slider_frame,
+            placeholder_text="Keyword",
+            font=CTk.CTkFont(size=12),
         )
         self.analyze_input_1.grid(
             row=3, column=0, padx=(20, 5), pady=(5, 5), sticky="nw"
         )
         self.analyze_input_2 = CTk.CTkEntry(
-            self.input_slider_frame, state="disabled", placeholder_text=""
+            self.input_slider_frame,
+            state="disabled",
+            placeholder_text="",
+            font=CTk.CTkFont(size=12),
         )
         self.analyze_input_2.grid(
             row=4, column=0, padx=(20, 5), pady=(5, 20), sticky="nw"
@@ -297,7 +306,9 @@ class App(CTk.CTk):
         self.right_button_1.grid(row=0, column=1, padx=10, sticky="we", pady=(5, 5))
         # Special search list box
         self.list_count = tkinter.IntVar(value=0)
-        self.analyze_list = tkinter.Listbox(self.input_slider_frame)
+        self.analyze_list = tkinter.Listbox(
+            self.input_slider_frame, font=CTk.CTkFont(size=12)
+        )
         self.analyze_list.grid(
             row=1, column=1, rowspan=4, padx=20, pady=(5, 20), sticky="news"
         )
@@ -320,9 +331,9 @@ class App(CTk.CTk):
         )
         # Path for output
         self.right_path_2 = CTk.CTkTextbox(
-            self.rightbar_frame, height=15, font=CTk.CTkFont(size=10)
+            self.rightbar_frame, height=15, font=CTk.CTkFont(size=12)
         )
-        self.right_path_2.grid(row=5, column=1, padx=(5, 20), pady=(5, 5))
+        self.right_path_2.grid(row=5, column=1, sticky="we", padx=(5, 20), pady=(5, 5))
         self.progressbar_2_text = CTk.CTkLabel(self.rightbar_frame)
 
         # Analyze button
@@ -422,7 +433,9 @@ class App(CTk.CTk):
                 "CREATE TABLE IF NOT EXISTS drawings(part_number TEXT UNIQUE NOT NULL PRIMARY KEY, drawing_text TEXT)"
             )
         except sqlite3.DatabaseError:
-            messagebox.showinfo(message=f"Selected database is invalid")
+            messagebox.showerror(message=f"Selected database is invalid")
+            return
+        except TypeError:
             return
 
         # Gets list of PNs that already exist in the DB
@@ -436,13 +449,19 @@ class App(CTk.CTk):
         global text_list
         input_path = self.leftbar_path_1.get("0.0", "end-1c")
         text_list = []
-        files = os.listdir(input_path)
+        try:
+            files = os.listdir(input_path)
+        except FileNotFoundError:
+            messagebox.showerror(message="Invalid input path")
+            return
         # Setup for progressbar before reading
         self.progressbar_1.set(0)
         self.progressbar_1.grid(
             row=9, column=0, columnspan=3, padx=(20, 20), pady=(5, 20), sticky="nsew"
         )
-        self.radiobutton_frame_2.grid_forget()
+        # self.radiobutton_frame_2.grid_forget()
+        self.radio_button_3.grid_forget()
+        self.radio_button_4.grid_forget()
         self.progressbar_1_text.grid(
             row=8, column=1, columnspan=2, padx=(5, 20), pady=(5, 5), sticky="nsew"
         )
@@ -509,26 +528,32 @@ class App(CTk.CTk):
         self.progressbar_1_text.configure(text=f"")
         self.progressbar_1.grid_forget()
         self.progressbar_1_text.grid_forget()
-        self.radiobutton_frame_2.grid(
-            row=8, column=1, columnspan=2, padx=(5, 20), pady=(5, 5), sticky="nsew"
-        )
+        self.radio_button_3.grid(row=0, column=0, pady=10, padx=5, sticky="n")
+        self.radio_button_4.grid(row=0, column=1, pady=10, padx=5, sticky="n")
+        # self.radiobutton_frame_2.grid(
+        #     row=8, column=1, columnspan=2, padx=(5, 20), pady=(5, 5), sticky="nsew"
+        # )
         db.commit()
         db.close()
         return
 
     def analyze(self):
+        # Connects to a DB
+        db_path = self.right_path_1.get("0.0", "end-1c")
+        try:
+            db = sqlite3.connect(db_path)
+            cur = db.cursor()
+            # Reads the DB
+            input_data = cur.execute("SELECT * FROM drawings").fetchall()
+        except sqlite3.OperationalError:
+            messagebox.showerror(message="DB table not found")
+            return
         # Progressbar setup
         self.progressbar_2.grid(
             row=6, column=1, padx=(5, 20), pady=(5, 20), sticky="nsew"
         )
         self.progressbar_2_text.grid(row=5, column=1, padx=(5, 20), pady=(5, 5))
         self.right_path_2.grid_forget()
-        # Connects to a DB
-        db_path = self.right_path_1.get("0.0", "end-1c")
-        db = sqlite3.connect(db_path)
-        cur = db.cursor()
-        # Reads the DB
-        input_data = cur.execute("SELECT * FROM drawings").fetchall()
         # Reads search criteria
         analyze_parametres = self.analyze_list.get("0", self.analyze_list.size() - 1)
         output = []
@@ -591,7 +616,7 @@ class App(CTk.CTk):
         self.progressbar_2_text.configure(text=f"")
         self.progressbar_2.grid_forget()
         self.progressbar_2_text.grid_forget()
-        self.right_path_2.grid(row=5, column=1, padx=(5, 20), pady=(5, 5))
+        self.right_path_2.grid(row=5, column=1, padx=(5, 20), pady=(5, 5), sticky="ew")
 
         return
 
