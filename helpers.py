@@ -4,6 +4,7 @@ from tkinter.filedialog import askdirectory, askopenfilename
 import PyPDF2
 import concurrent.futures
 import re
+import ocrmypdf
 
 
 # Gets folder path input
@@ -111,3 +112,16 @@ def search_between(keyword_tuple, text):
             return out
     except AttributeError:
         return "Not found4"
+
+
+def ocr_pdf(path, folder_path):
+    try:
+        out = os.path.join(folder_path, "out.pdf")
+        ocrmypdf.ocr(path, out, deskew=True)
+        fileReader = PyPDF2.PdfReader(out)
+        page = fileReader.pages[0]
+        text = page.extract_text()
+        os.remove(out)
+    except:
+        return "Could not OCR"
+    return text

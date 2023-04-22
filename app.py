@@ -12,6 +12,7 @@ from helpers import (
     read_pdf,
     search_keyword,
     search_between,
+    ocr_pdf,
 )
 from PIL import Image
 
@@ -161,7 +162,6 @@ class App(CTk.CTk):
         self.leftbar_button_read = CTk.CTkButton(
             self.leftbar_frame,
             text="READ",
-            height=50,
             command=lambda: threading.Thread(target=self.read_write).start(),
         )
         self.leftbar_button_read.grid(
@@ -172,7 +172,7 @@ class App(CTk.CTk):
             self.leftbar_frame,
         )
         self.radiobutton_frame_2.grid(
-            row=8, column=1, columnspan=2, padx=(5, 20), pady=(5, 5), sticky="nsew"
+            row=8, column=1, columnspan=2, padx=(5, 20), pady=(5, 20), sticky="nsew"
         )
         # self.radiobutton_frame_2.grid_columnconfigure(0, weight=3)
         # self.radiobutton_frame_2.grid_columnconfigure(1, weight=4)
@@ -183,18 +183,30 @@ class App(CTk.CTk):
             text="Update existing data",
             value=0,
         )
-        self.radio_button_3.grid(row=0, column=0, pady=10, padx=5, sticky="nsew")
+        self.radio_button_3.grid(row=0, column=0, pady=5, padx=5, sticky="nsew")
         self.radio_button_4 = CTk.CTkRadioButton(
             self.radiobutton_frame_2,
             variable=self.radio_out_2,
             text="Don't update existing data",
             value=1,
         )
-        self.radio_button_4.grid(row=0, column=1, pady=10, padx=5, sticky="nsew")
+        self.radio_button_4.grid(row=0, column=1, pady=5, padx=5, sticky="nsew")
         # Left progress bar
         self.progressbar_1 = CTk.CTkProgressBar(
             self.leftbar_frame, height=20, corner_radius=5, border_width=3
         )
+        # Ocr usage checkbox
+        self.ocr_checkbox = CTk.CTkCheckBox(
+            master=self.radiobutton_frame_2,
+            text="Use OCR to read pdf's",
+            onvalue=True,
+            offvalue=False,
+        )
+        self.ocr_checkbox.grid(
+            row=1, column=0, columnspan=2, sticky="wesn", padx=(5, 20), pady=(5, 5)
+        )
+        self.ocr_checkbox.select()
+
         # Progressbar text box
         self.progressbar_1_text = CTk.CTkLabel(
             self.radiobutton_frame_2,
@@ -482,6 +494,14 @@ class App(CTk.CTk):
             file_path = input_path + "/" + file
             # Reads text from PDF
             text = read_pdf(file_path)
+            # If read pdf does not work
+            if (
+                text == ""
+                or text == "Cannot be read"
+                and self.ocr_checkbox.get() == True
+            ):
+                text = ocr_pdf(file_path, input_path)
+
             # Gets the part number from file name by striping .pdf
             pn_split = file.split(".")
             pn = pn_split[0]
