@@ -381,14 +381,14 @@ class App(CTk.CTk):
 
     def load_folder_input1(self):
         path_in_1 = get_folder_path()
+        if path_in_1:
+            # Writes amount of files to leftbar_amount text field
+            self.leftbar_amount.delete("0.0", "end")
+            self.leftbar_amount.insert("0.0", len(os.listdir(path_in_1)))
 
-        # Writes amount of files to leftbar_amount text field
-        self.leftbar_amount.delete("0.0", "end")
-        self.leftbar_amount.insert("0.0", len(os.listdir(path_in_1)))
-
-        # Writes to leftbar_path1 field
-        self.leftbar_path_1.delete("0.0", "end")
-        self.leftbar_path_1.insert("0.0", path_in_1)
+            # Writes to leftbar_path1 field
+            self.leftbar_path_1.delete("0.0", "end")
+            self.leftbar_path_1.insert("0.0", path_in_1)
         return
 
     def load_output_1(self):
@@ -442,7 +442,7 @@ class App(CTk.CTk):
             db = sqlite3.connect(output_db_path)
             cur = db.cursor()
             cur.execute(
-                "CREATE TABLE IF NOT EXISTS drawings(part_number TEXT UNIQUE NOT NULL PRIMARY KEY, drawing_text TEXT)"
+                "CREATE TABLE IF NOT EXISTS pdf_data(pdf_name TEXT UNIQUE NOT NULL PRIMARY KEY, pdf_text TEXT)"
             )
         except sqlite3.DatabaseError:
             messagebox.showerror(message=f"Selected database is invalid")
@@ -451,10 +451,10 @@ class App(CTk.CTk):
             return
 
         # Gets list of PNs that already exist in the DB
-        pn_tuples = cur.execute("SELECT part_number FROM drawings").fetchall()
-        existing_pn = []
-        for pn_tuple in pn_tuples:
-            existing_pn.append(pn_tuple[0])
+        file_name_tuples = cur.execute("SELECT pdf_name FROM pdf_data").fetchall()
+        existing_file_names = []
+        for file_name in file_name_tuples:
+            existing_file_names.append(file_name[0])
 
         # Reading
         global input_path
@@ -487,7 +487,7 @@ class App(CTk.CTk):
             )
             self.update_idletasks
             # If update is not wanted skip to next file
-            if self.radio_out_2 == 1 and file in existing_pn:
+            if self.radio_out_2 == 1 and file in existing_file_names:
                 continue
 
             # Creates path to a file
@@ -506,7 +506,7 @@ class App(CTk.CTk):
             pn_split = file.split(".")
             pn = pn_split[0]
             # Outputs a list of dictionaries pn : text
-            text_list.append({"pn": pn, "drawing_text": text})
+            text_list.append({"pn": pn, "pdf_text": text})
 
         # WRITING
         # Setup for progressbar before writing to DB
@@ -517,17 +517,17 @@ class App(CTk.CTk):
         # For every read drawing
         for index, line in enumerate(text_list, start=1):
             # If PN already exists in the database, update drawing text
-            if line["pn"] in existing_pn:
+            if line["pn"] in existing_file_names:
                 cur.execute(
-                    "UPDATE drawings SET drawing_text = ? WHERE part_number = ?",
-                    (line["drawing_text"], line["pn"]),
+                    "UPDATE pdf_data SET pdf_text = ? WHERE pdf_name = ?",
+                    (line["pdf_text"], line["pn"]),
                 )
             # If PN is new
             else:
                 try:
                     cur.execute(
-                        "INSERT INTO drawings (part_number, drawing_text) VALUES(?, ?)",
-                        (line["pn"], line["drawing_text"]),
+                        "INSERT INTO pdf_data (pdf_name, pdf_text) VALUES(?, ?)",
+                        (line["pn"], line["pdf_text"]),
                     )
                 except:
                     not_successful.append(line["pn"])
@@ -558,13 +558,26 @@ class App(CTk.CTk):
         return
 
     def analyze(self):
+        # Checks if the output excel sheet can be created
+        if self.right_path_2.get("0.0", "end-1c") == "":
+            messagebox.showerror(message="Output folder was not selected")
+            return
+        output_path = self.right_path_2.get("0.0", "end-1c") + "/extract.xlsx"
+        try:
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            ws.title = "Export"
+            wb.save(output_path)
+        except PermissionError:
+            messagebox.showerror(message="Failed to create output file")
+            return
         # Connects to a DB
         db_path = self.right_path_1.get("0.0", "end-1c")
         try:
             db = sqlite3.connect(db_path)
             cur = db.cursor()
             # Reads the DB
-            input_data = cur.execute("SELECT * FROM drawings").fetchall()
+            input_data = cur.execute("SELECT * FROM pdf_data").fetchall()
         except sqlite3.OperationalError:
             messagebox.showerror(message="DB table not found")
             return
@@ -598,11 +611,7 @@ class App(CTk.CTk):
             )
             self.update_idletasks
 
-        # Save output in excel sheet
-        output_path = self.right_path_2.get("0.0", "end-1c") + "/extract.xlsx"
-        wb = openpyxl.Workbook()
-        ws = wb.active
-        ws.title = "Export"
+        # Writing to excel sheet
         # Headers
         ws.cell(row=1, column=1).value = "File name"
         for index, parameter in enumerate(analyze_parametres):
@@ -613,7 +622,7 @@ class App(CTk.CTk):
                     row=1, column=index + 2
                 ).value = f"{parameter[1]} {parameter[2]}"
 
-        # Output writing output=[(part_number,[param1, param2...]), (..)]
+        # Output writing output=[(pdf_name,[param1, param2...]), (..)]
         for row_index, row in enumerate(output, start=2):
             ws.cell(row=row_index, column=1).value = row[0]
             data_columns = row[1]

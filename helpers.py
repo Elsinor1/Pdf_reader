@@ -50,14 +50,14 @@ def read(path):
 
 def read_thread(file):
     # Creates path to a file
-    file_path = read_path + "/" + file
+    file_path = os.path.join(read_path, file)
     # Reads text from PDF
     text = read_pdf(file_path)
     # Gets the part number from file name by striping .pdf
-    pn_split = file.split(".")
-    pn = pn_split[0]
+    file_name_split = file.split(".")
+    file_name = file_name_split[0]
     # Outputs a list of dictionaries pn : text
-    read_output.append({"pn": pn, "drawing_text": text})
+    read_output.append({"file_name": file_name, "pdf_text": text})
     return
 
 
@@ -89,22 +89,9 @@ def search_keyword(keyword, text):
 
 def search_between(keyword_tuple, text):
     try:
-        # pattern = f"{keyword_tuple[0]}\n((.|\n)*){keyword_tuple[1]}\d+"
-        # pattern = (
-        #     r"\b\w*" + keyword_tuple[1] + r"(.|\n)*" + keyword_tuple[2] + r"\w*\b"   .*?
-        # )
-        # pattern = r"(?:{0})(.|\n)(?:{1})".format(re.escape(keyword_tuple[1]), re.escape(keyword_tuple[2]))
-        # out = re.search(pattern, text, re.IGNORECASE).group(1).strip()
-        # print(out)
-        # re.sub(f"{keyword_tuple[1]}", "", out, re.IGNORECASE)
-        # re.sub(f"{keyword_tuple[2]}", "", out, re.IGNORECASE)
-
         pattern = re.compile(
             rf"{keyword_tuple[1]}\n(.*?)\n{keyword_tuple[2]}", re.DOTALL | re.IGNORECASE
         )
-        # print(pattern)
-
-        # search for the text between the start and end strings
         out = re.search(pattern, text).group(1).strip()
         if out == None:
             return "Not found3"
