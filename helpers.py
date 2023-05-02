@@ -90,7 +90,7 @@ def search_keyword(keyword, text):
 def search_between(keyword_tuple, text):
     try:
         pattern = re.compile(
-            rf"{keyword_tuple[1]}\n(.*?)\n{keyword_tuple[2]}", re.DOTALL | re.IGNORECASE
+            rf"{keyword_tuple[1]}(.*?){keyword_tuple[2]}", re.DOTALL | re.IGNORECASE
         )
         out = re.search(pattern, text).group(1).strip()
         if out == None:
