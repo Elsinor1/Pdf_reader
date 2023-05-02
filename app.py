@@ -114,7 +114,26 @@ class App(CTk.CTk):
         self.leftbar_path_1.grid(
             row=4, column=0, columnspan=3, padx=20, pady=(5, 20), sticky="ew"
         )
-
+        # Update radio button
+        self.radiobutton_frame_2 = CTk.CTkFrame(
+            self.leftbar_frame,
+        )
+        self.radiobutton_frame_2.grid(
+            row=8, column=1, columnspan=2, padx=(5, 20), pady=(5, 20), sticky="nsew"
+        )
+        self.radio_out_2 = tkinter.IntVar(value=0)
+        self.radio_button_3 = CTk.CTkRadioButton(
+            self.radiobutton_frame_2,
+            variable=self.radio_out_2,
+            text="Update existing data",
+            value=0,
+        )
+        self.radio_button_4 = CTk.CTkRadioButton(
+            self.radiobutton_frame_2,
+            variable=self.radio_out_2,
+            text="Don't update existing data",
+            value=1,
+        )
         # Select output
         self.label_2 = CTk.CTkLabel(
             self.leftbar_frame,
@@ -131,12 +150,13 @@ class App(CTk.CTk):
         )
         self.radiobutton_frame.grid_columnconfigure(0, weight=3)
         self.radiobutton_frame.grid_columnconfigure(1, weight=4)
-        self.radio_out_1 = tkinter.IntVar(value=0)
+        self.radio_out_1 = tkinter.IntVar(value=1)
         self.radio_button_1 = CTk.CTkRadioButton(
             self.radiobutton_frame,
             variable=self.radio_out_1,
             text="Choose existing db",
             value=0,
+            command=self.show_update_button,
         )
         self.radio_button_1.grid(row=0, column=0, pady=10, padx=5, sticky="n")
         self.radio_button_2 = CTk.CTkRadioButton(
@@ -144,6 +164,7 @@ class App(CTk.CTk):
             variable=self.radio_out_1,
             text="Create new db",
             value=1,
+            command=self.show_update_button,
         )
         self.radio_button_2.grid(row=0, column=1, pady=10, padx=5, sticky="n")
         # Select output folder
@@ -163,34 +184,11 @@ class App(CTk.CTk):
             self.leftbar_frame,
             text="READ",
             command=lambda: threading.Thread(target=self.read_write).start(),
+            height=70,
         )
         self.leftbar_button_read.grid(
             row=8, column=0, padx=(20, 5), pady=(5, 20), sticky="WESN"
         )
-        # Update radio button
-        self.radiobutton_frame_2 = CTk.CTkFrame(
-            self.leftbar_frame,
-        )
-        self.radiobutton_frame_2.grid(
-            row=8, column=1, columnspan=2, padx=(5, 20), pady=(5, 20), sticky="nsew"
-        )
-        # self.radiobutton_frame_2.grid_columnconfigure(0, weight=3)
-        # self.radiobutton_frame_2.grid_columnconfigure(1, weight=4)
-        self.radio_out_2 = tkinter.IntVar(value=0)
-        self.radio_button_3 = CTk.CTkRadioButton(
-            self.radiobutton_frame_2,
-            variable=self.radio_out_2,
-            text="Update existing data",
-            value=0,
-        )
-        self.radio_button_3.grid(row=0, column=0, pady=5, padx=5, sticky="nsew")
-        self.radio_button_4 = CTk.CTkRadioButton(
-            self.radiobutton_frame_2,
-            variable=self.radio_out_2,
-            text="Don't update existing data",
-            value=1,
-        )
-        self.radio_button_4.grid(row=0, column=1, pady=5, padx=5, sticky="nsew")
         # Left progress bar
         self.progressbar_1 = CTk.CTkProgressBar(
             self.leftbar_frame, height=20, corner_radius=5, border_width=3
@@ -385,7 +383,6 @@ class App(CTk.CTk):
             # Writes amount of files to leftbar_amount text field
             self.leftbar_amount.delete("0.0", "end")
             self.leftbar_amount.insert("0.0", len(os.listdir(path_in_1)))
-
             # Writes to leftbar_path1 field
             self.leftbar_path_1.delete("0.0", "end")
             self.leftbar_path_1.insert("0.0", path_in_1)
@@ -397,7 +394,6 @@ class App(CTk.CTk):
             path_out_1 = get_file_path()
         else:
             path_out_1 = get_folder_path()
-
         # Writes to leftbar_path2 field
         self.leftbar_path_2.delete("0.0", "end")
         self.leftbar_path_2.insert("0.0", path_out_1)
@@ -471,7 +467,6 @@ class App(CTk.CTk):
         self.progressbar_1.grid(
             row=9, column=0, columnspan=3, padx=(20, 20), pady=(5, 20), sticky="nsew"
         )
-        # self.radiobutton_frame_2.grid_forget()
         self.radio_button_3.grid_forget()
         self.radio_button_4.grid_forget()
         self.progressbar_1_text.grid(
@@ -610,7 +605,6 @@ class App(CTk.CTk):
                 text=f"ANALYZING DB: {index} / {input_total}"
             )
             self.update_idletasks
-
         # Writing to excel sheet
         # Headers
         ws.cell(row=1, column=1).value = "File name"
@@ -621,7 +615,6 @@ class App(CTk.CTk):
                 ws.cell(
                     row=1, column=index + 2
                 ).value = f"{parameter[1]} {parameter[2]}"
-
         # Output writing output=[(pdf_name,[param1, param2...]), (..)]
         for row_index, row in enumerate(output, start=2):
             ws.cell(row=row_index, column=1).value = row[0]
@@ -632,21 +625,29 @@ class App(CTk.CTk):
                 except:
                     normal_string = "".join(ch for ch in column if ch.isalnum())
                     ws.cell(row=row_index, column=col_index).value = normal_string
-
             self.progressbar_2_text.configure(
                 text=f"SAVING TO EXCEL FILE: {row_index - 1} / {input_total}"
             )
             self.progressbar_2.set(row_index / input_total)
             self.update_idletasks()
-
         wb.save(output_path)
-
         messagebox.showinfo(message="Analyze is finished")
         self.progressbar_2_text.configure(text=f"")
         self.progressbar_2.grid_forget()
         self.progressbar_2_text.grid_forget()
         self.right_path_2.grid(row=5, column=1, padx=(5, 20), pady=(5, 5), sticky="ew")
 
+        return
+
+    def show_update_button(self):
+        if self.radio_out_1.get() == 1:
+            self.radio_button_3.grid_forget()
+            self.radio_button_4.grid_forget()
+            self.update_idletasks()
+        else:
+            self.radio_button_3.grid(row=0, column=0, pady=5, padx=5, sticky="nsew")
+            self.radio_button_4.grid(row=0, column=1, pady=5, padx=5, sticky="nsew")
+            self.update_idletasks()
         return
 
 
